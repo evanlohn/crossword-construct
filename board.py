@@ -150,4 +150,7 @@ class Entry:
         self.across_clue = None
         self.down_clue = None
 
+    def toggle_blocked(self):
+        self.blocked = not self.blocked
+
 
