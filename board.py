@@ -102,7 +102,7 @@ class Board:
                 entry = self.board_lst[row][col]
                 if entry.blocked: # handle previous clue assignment
                     if clue_start_row is not None:
-                        prev_clue_ind, found_clue = self.handle_clue_end(prev_clue_ind, col_clues, row, col, clue_start_row)
+                        prev_clue_ind, found_clue = self.handle_clue_end(prev_clue_ind, col_clues, row, col, clue_start_row, across=False)
                         new_col_clues.append(found_clue)
 
                     clue_start_row = None
@@ -124,8 +124,19 @@ class Board:
 
 
     def clues_as_text(self):
-        return []
+        ac_flat = []
+        for row, clue_list in enumerate(self.ac_clue_list):
+            for clue in clue_list:
+                c_num = self.board_lst[clue.start[0]][clue.start[1]].clue_num
+                ac_flat.append((c_num, clue))
 
+        do_flat = []
+        for col, clue_list in enumerate(self.do_clue_list):
+            for clue in clue_list:
+                c_num = self.board_lst[clue.start[0]][clue.start[1]].clue_num
+                do_flat.append((c_num, clue))
+
+        return ac_flat, sorted(do_flat, key=lambda x: x[0])
 
 
 class Clue:
