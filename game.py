@@ -6,6 +6,14 @@ from board import Board
 clue_labels = ['Across', 'Down']
 ACROSS, DOWN = clue_labels
 
+
+#TODO: 
+# 1) Serialize and read boards
+# 2) maintain a "current direction", and when a letter is entered on the board,
+#    select the next entry in that direction if not blocked
+# 3) When a square on the board is clicked, find the corresponding clue 
+#    (in the "current direction") and scroll to it (? maybe unecessary)
+# 4) "Play mode" ?
 def click_handler(r_ind, c_ind, game):
     def handle_click(event):
         #print(r_ind, c_ind)
