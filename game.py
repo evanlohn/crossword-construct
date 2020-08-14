@@ -2,6 +2,7 @@ import tkinter as tk
 
 from PIL import Image, ImageTk
 from board import Board
+import pickle
 
 clue_labels = ['Across', 'Down']
 ACROSS, DOWN = clue_labels
@@ -14,6 +15,9 @@ ACROSS, DOWN = clue_labels
 # 3) When a square on the board is clicked, find the corresponding clue 
 #    (in the "current direction") and scroll to it (? maybe unecessary)
 # 4) "Play mode" ?
+
+
+
 def click_handler(r_ind, c_ind, game):
     def handle_click(event):
         #print(r_ind, c_ind)
@@ -64,7 +68,7 @@ def increase_sz(board, game):
 
 class Game:
 
-    def __init__(self, board):
+    def __init__(self, board, pth='./temp.pkl'):
         self.board = board
 
         ## Tkinter stuff
@@ -131,7 +135,11 @@ class Game:
         self.ck = tk.Checkbutton(tmp_frame, relief=tk.GROOVE, text='Place Blocks',
             variable=self.placing_blocks, onvalue=1,
              offvalue=0)
-        self.ck.pack(side=tk.TOP, fill=tk.BOTH, expand=True)
+        self.ck.pack(side=tk.LEFT, fill=tk.BOTH, expand=True)
+
+        self.saver = tk.Button(tmp_frame, text='Save to File', command=lambda:self.serialize(pth))
+        self.saver.pack(side=tk.LEFT, fill=tk.BOTH, expand=True)
+
 
         self.size_frame = tk.Frame(master=self.info_frame, bg='green')
         self.size_frame.grid(row=2, column=0, sticky='nsew')
@@ -386,6 +394,10 @@ class Game:
         #self.selected = None
         frame.config(highlightthickness=0)
         
+    def serialize(self, filename, mode='pickle'):
+        if mode == 'pickle':
+            with open(filename, 'wb') as f:
+                pickle.dump(self.board, f)
 
     def display_board(self):
         self.window.mainloop()
