@@ -38,7 +38,6 @@ def click_handler(r_ind, c_ind, game):
 def key_handler(r_ind, c_ind, game):
     def handle_key(event):
         c_inp = str(event.char)
-        print(r_ind, c_ind, str(event.char))
         game.get_entry(r_ind, c_ind).val = c_inp
         game.update_square(r_ind, c_ind)
     return handle_key
@@ -46,6 +45,20 @@ def key_handler(r_ind, c_ind, game):
 def handle_text_change(clue):
     def handler(event):
         clue.text = event.widget.get('1.0', tk.END)
+    return handler
+
+def decrease_sz(board, game):
+    def handler():
+        board.decrease_sz()
+        game.redraw_grid()
+        game.update_all()
+    return handler
+
+def increase_sz(board, game):
+    def handler():
+        board.increase_sz()
+        game.redraw_grid()
+        game.update_all()
     return handler
 
 
@@ -68,32 +81,7 @@ class Game:
         self.sel_dir = ACROSS
         self.placing_blocks = tk.BooleanVar(False)
 
-        ## put pieces on board
-        for r_ind, row in enumerate(self.board.board_lst):
-            self.board_frame.columnconfigure(r_ind, weight=1, minsize=75) #, minsize=50
-            self.board_frame.rowconfigure(r_ind, weight=1, minsize=75)
-            for c_ind, piece in enumerate(row):
-
-                c_handler = click_handler(r_ind, c_ind, self)
-                k_handler = key_handler(r_ind, c_ind, self)
-                frame = tk.Frame(master=self.board_frame, relief=tk.GROOVE, borderwidth=1, bg='white')
-                frame.displayed_label = None
-                frame.bind("<Key>", k_handler)
-
-                frame.bind("<Button-1>", c_handler)
-                frame.grid(row=r_ind, column=c_ind, sticky="nsew")
-
-                frame.columnconfigure(0, weight=1, minsize=15)
-                frame.rowconfigure(0, weight=1, minsize=15)
-                clue_num_label = tk.Label(frame, text=' ')
-                clue_num_label.place(x=0, y=0)
-                #clue_num_label.grid(row=0, column=0, sticky='nw')
-                #clue_num_label.pack(side = tk.TOP, fill=tk.X)
-                frame.clue_num_label = clue_num_label
-                #frame.grid(row=0, column=0, sticky='nw')
-
-
-                #self.update_square(r_ind, c_ind)
+        self.redraw_grid()
 
         ## Add info pane stuff 
         #self.turn_label = tk.Label(self.info_frame, text='Turn: White')
@@ -128,7 +116,8 @@ class Game:
         
         self.info_frame.grid_rowconfigure(0, weight=0)
         self.info_frame.grid_rowconfigure(1, weight=0)
-        self.info_frame.grid_rowconfigure(2, weight=1)
+        self.info_frame.grid_rowconfigure(2, weight=0)
+        self.info_frame.grid_rowconfigure(3, weight=1)
         self.info_frame.grid_columnconfigure(0, weight=1, minsize=300)
 
 
@@ -142,12 +131,21 @@ class Game:
         self.ck = tk.Checkbutton(tmp_frame, relief=tk.GROOVE, text='Place Blocks',
             variable=self.placing_blocks, onvalue=1,
              offvalue=0)
-        self.ck.pack(side=tk.TOP, fill=tk.X, expand=True)
+        self.ck.pack(side=tk.TOP, fill=tk.BOTH, expand=True)
+
+        self.size_frame = tk.Frame(master=self.info_frame, bg='green')
+        self.size_frame.grid(row=2, column=0, sticky='nsew')
+
+
+        self.larger = tk.Button(self.size_frame, text='larger', command=increase_sz(self.board, self))
+        self.smaller = tk.Button(self.size_frame, text='smaller', command=decrease_sz(self.board, self))
+        self.larger.pack(side=tk.LEFT, fill=tk.BOTH, expand=True)
+        self.smaller.pack(side=tk.RIGHT, fill=tk.BOTH, expand=True)
 
         self.board.sync_clues_with_board(list(range(self.board.rows)), list(range(self.board.cols)))
 
         self.parent_clues_frame = tk.Frame(self.info_frame)
-        self.parent_clues_frame.grid(row=2, column=0, sticky='news')
+        self.parent_clues_frame.grid(row=3, column=0, sticky='news')
         #self.parent_clues_frame.grid(row=2, column=0, pady=(5,0), sticky='news')
 
         self.parent_clues_frame.grid_rowconfigure(0, minsize=100, weight=1)
@@ -215,7 +213,38 @@ class Game:
         else:
             self.sel_dir = ACROSS
 
-        #TODO: update graphics for row and column
+    def redraw_grid(self):
+        for child in self.board_frame.winfo_children():
+            child.grid_forget()
+            child.destroy()
+
+        ## put pieces on board
+        for r_ind, row in enumerate(self.board.board_lst):
+            self.board_frame.columnconfigure(r_ind, weight=1, minsize=75) #, minsize=50
+            self.board_frame.rowconfigure(r_ind, weight=1, minsize=75)
+            for c_ind, piece in enumerate(row):
+
+                c_handler = click_handler(r_ind, c_ind, self)
+                k_handler = key_handler(r_ind, c_ind, self)
+                frame = tk.Frame(master=self.board_frame, relief=tk.GROOVE, borderwidth=1, bg='white')
+                frame.displayed_label = None
+                frame.bind("<Key>", k_handler)
+
+                frame.bind("<Button-1>", c_handler)
+                frame.grid(row=r_ind, column=c_ind, sticky="nsew")
+
+                frame.columnconfigure(0, weight=1, minsize=15)
+                frame.rowconfigure(0, weight=1, minsize=15)
+                clue_num_label = tk.Label(frame, text=' ')
+                clue_num_label.place(x=0, y=0)
+                #clue_num_label.grid(row=0, column=0, sticky='nw')
+                #clue_num_label.pack(side = tk.TOP, fill=tk.X)
+                frame.clue_num_label = clue_num_label
+                #frame.grid(row=0, column=0, sticky='nw')
+        self.board_frame.columnconfigure(len(self.board.board_lst), weight=0, minsize=0) #, minsize=50
+        self.board_frame.rowconfigure(len(self.board.board_lst), weight=0, minsize=0)
+        
+
 
     def update_square(self, row, col):
         entry = self.get_entry(row, col)

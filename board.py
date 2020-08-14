@@ -10,6 +10,29 @@ class Board:
         self.do_clue_list = [[] for i in range(self.cols)]
         self.sync_clues_with_board(list(range(self.rows)), list(range(self.cols)))
 
+    def increase_sz(self):
+        self.rows += 1
+        self.cols += 1
+        for lst in self.board_lst:
+            lst.append(Entry())
+        self.board_lst.append([Entry() for _ in range(self.rows)])
+        self.ac_clue_list.append([])
+        self.do_clue_list.append([])
+        self.sync_clues_with_board(list(range(self.rows)), list(range(self.cols)))
+
+    def decrease_sz(self):
+        if self.rows <= 2:
+            return
+        self.rows -= 1
+        self.cols -= 1
+        self.board_lst.pop(-1)
+        for lst in self.board_lst:
+            lst.pop(-1)
+
+        self.ac_clue_list.pop(-1)
+        self.do_clue_list.pop(-1)
+        self.sync_clues_with_board(list(range(self.rows)), list(range(self.cols)))
+
     def is_wall(self, row, col):
         return row < 0 or col < 0 or self.board_lst[row][col].blocked
 
